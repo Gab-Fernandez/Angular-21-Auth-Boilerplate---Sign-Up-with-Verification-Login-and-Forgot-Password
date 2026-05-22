@@ -64,12 +64,20 @@ export class AccountService {
     }
 
     validateResetToken(token: string) {
-        return this.http.post(`${baseUrl}/validate-reset-token`, { token });
-    }
+        return this.http.post(
+        `${baseUrl}/validate-reset-token`,
+        { token },
+        { withCredentials: true }
+    );
+}
 
     resetPassword(token: string, password: string, confirmPassword: string) {
-        return this.http.post(`${baseUrl}/reset-password`, { token, password, confirmPassword });
-    }
+        return this.http.post(
+        `${baseUrl}/reset-password`,
+        { token, password, confirmPassword },
+        { withCredentials: true }
+    );
+}
 
     getAll() {
         return this.http.get<Account[]>(baseUrl);
