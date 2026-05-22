@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://backend-sigma-umber-61.vercel.app'
+    apiUrl: 'https://ipt-2026-backend-fernandez.vercel.app'
 };
