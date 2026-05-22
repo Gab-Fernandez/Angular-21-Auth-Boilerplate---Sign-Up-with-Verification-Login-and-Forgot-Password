@@ -1,4 +1,4 @@
-<h3 class="card-header">Login</h3>
+<h5 class="card-header">Login</h5>
 <div class="card-body">
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="mb-3">
@@ -17,7 +17,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="mb-3 col">
+            <div class="mb-3 col btn-primary">
                 <button [disabled]="submitting" class="btn btn-primary">
                     <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
                     Login

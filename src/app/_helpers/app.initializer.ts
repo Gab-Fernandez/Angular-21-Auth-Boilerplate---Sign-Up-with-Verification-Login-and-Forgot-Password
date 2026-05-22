@@ -1,11 +1,11 @@
-import { catchError, of } from 'rxjs';
+import { catchError, of, timeout } from "rxjs";
 
 import { AccountService } from '@app/_services';
 
 export function appInitializer(accountService: AccountService) {
     return () => accountService.refreshToken()
         .pipe(
-            // catch error to start app on success or failure
+            timeout(5000),
             catchError(() => of())
         );
 }

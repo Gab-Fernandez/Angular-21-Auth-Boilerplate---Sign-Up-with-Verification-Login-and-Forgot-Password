@@ -2,10 +2,11 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { finalize, first } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '@app/_services';
+import { Account } from '@app/_models';
 
 @Component({ templateUrl: 'list.component.html', standalone: false })
 export class ListComponent implements OnInit, OnDestroy {
-    accounts: any[] = [];
+    accounts: (Account & { isDeleting?: boolean })[] = [];
     loading = false;
 
     private loadTimeoutId?: number;
@@ -46,7 +47,7 @@ export class ListComponent implements OnInit, OnDestroy {
                     this.accounts = accounts;
                     this.cdr.detectChanges();
                 },
-                error: error => {
+                error: (error: string) => {
                     this.alertService.error(error);
                     this.accounts = [];
                     this.cdr.detectChanges();

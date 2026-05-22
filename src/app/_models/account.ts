@@ -1,4 +1,4 @@
-import { Role } from "./role";
+import { Role } from './role';
 
 export class Account {
     id?: string;
@@ -6,8 +6,6 @@ export class Account {
     firstName?: string;
     lastName?: string;
     email?: string;
-    role?: string;
+    role?: Role;
     jwtToken?: string;
-    dateCreated?: string;
-    isVerified?: boolean;
 }

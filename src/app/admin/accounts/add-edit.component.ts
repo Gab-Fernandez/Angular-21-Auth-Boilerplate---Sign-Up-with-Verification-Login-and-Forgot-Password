@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize, first } from 'rxjs/operators';
 
 import { AccountService, AlertService } from '@app/_services';
+import { Account } from '@app/_models';
 import { MustMatch } from '@app/_helpers';
 
 @Component({ templateUrl: 'add-edit.component.html', standalone: false })
@@ -69,11 +70,11 @@ export class AddEditComponent implements OnInit, OnDestroy {
                     })
                 )
                 .subscribe({
-                    next: x => {
+                    next: (x: Account) => {
                         this.form.patchValue(x);
                         this.cdr.detectChanges();
                     },
-                    error: error => {
+                    error: (error: string) => {
                         this.alertService.error(error);
                         this.cdr.detectChanges();
                     }
@@ -122,7 +123,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
                     this.alertService.success(message, { keepAfterRouteChange: true });
                     this.router.navigateByUrl('/admin/accounts');
                 },
-                error: error => {
+                error: (error: string) => {
                     this.alertService.error(error);
                     this.submitting = false;
                     this.cdr.detectChanges();

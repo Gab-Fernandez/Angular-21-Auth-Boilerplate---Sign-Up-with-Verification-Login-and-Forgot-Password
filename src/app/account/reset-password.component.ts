@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
-
+import { first, timeout, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { AccountService, AlertService } from '@app/_services';
 import { MustMatch } from '@app/_helpers';
 
@@ -16,6 +16,7 @@ enum TokenStatus {
 export class ResetPasswordComponent implements OnInit {
     TokenStatus = TokenStatus;
     tokenStatus = TokenStatus.Validating;
+    status = 'validating';
     token?: string;
     form!: FormGroup;
     loading = false;
@@ -26,8 +27,9 @@ export class ResetPasswordComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private accountService: AccountService,
-        private alertService: AlertService
-    ) { }
+        private alertService: AlertService,
+        private cd: ChangeDetectorRef
+    ) {}
 
     ngOnInit() {
         this.form = this.formBuilder.group({
@@ -37,47 +39,56 @@ export class ResetPasswordComponent implements OnInit {
             validator: MustMatch('password', 'confirmPassword')
         });
 
-    const token = this.route.snapshot.queryParams['token'];
+        let token = this.route.snapshot.queryParams['token'] 
+                 || this.route.snapshot.queryParams['Token'];
 
         if (!token) {
-        this.tokenStatus = TokenStatus.Invalid;
-        return;
-}
+            this.tokenStatus = TokenStatus.Invalid;
+            this.status = 'invalid';
+            return;
+        }
+
+        token = token.replace(/ /g, '+');
 
         this.accountService.validateResetToken(token)
-            .pipe(first())
-            .subscribe({
-                next: () => {
+            .pipe(
+                timeout(30000),
+                first(),
+                catchError(error => {
+                    console.error('Token validation failed:', error);
+                    this.status = 'invalid';
+                    this.tokenStatus = TokenStatus.Invalid;
+                    this.cd.detectChanges();
+                    return of(null);
+                })
+            )
+            .subscribe(result => {
+                if (result !== null) {
                     this.token = token;
+                    this.status = 'valid';
                     this.tokenStatus = TokenStatus.Valid;
-                },
-                error: () => {
+                } else {
+                    this.status = 'invalid';
                     this.tokenStatus = TokenStatus.Invalid;
                 }
+                this.router.navigate([], { relativeTo: this.route, replaceUrl: true });
+                this.cd.detectChanges();
             });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
-
-        // reset alerts on submit
         this.alertService.clear();
-
-        // stop here if form is invalid
-        if (this.form.invalid) {
-            return;
-        }
-
+        if (this.form.invalid) return;
         this.loading = true;
         this.accountService.resetPassword(this.token!, this.f.password.value, this.f.confirmPassword.value)
             .pipe(first())
             .subscribe({
                 next: () => {
                     this.alertService.success('Password reset successful, you can now login', { keepAfterRouteChange: true });
-                    
+                    this.router.navigate(['../login'], { relativeTo: this.route });
                 },
                 error: error => {
                     this.alertService.error(error);
